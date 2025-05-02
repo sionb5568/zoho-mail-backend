@@ -1,0 +1,18 @@
+{
+    "name": "zoho-mail-backend",
+    "version": "1.0.0",
+    "description": "Zoho Mail backend for sending and receiving emails using IMAP and SMTP",
+    "main": "server.js",
+    "scripts": {
+      "start": "node server.js"
+    },
+    "dependencies": {
+      "cors": "^2.8.5",
+      "dotenv": "^16.0.3",
+      "express": "^4.18.2",
+      "imap-simple": "^5.0.0",
+      "mailparser": "^3.6.4",
+      "nodemailer": "^6.9.3"
+    }
+  }
+
