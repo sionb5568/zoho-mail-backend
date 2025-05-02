@@ -2,19 +2,19 @@ const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 const Imap = require('imap-simple');
-const MailParser = require('mailparser').simpleParser;
+const { simpleParser } = require('mailparser');
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// POST /send — Send email
+// 이메일 보내기
 app.post('/send', async (req, res) => {
   const { to, subject, body } = req.body;
 
   const transporter = nodemailer.createTransport({
-    host: "smtp.zoho.com", // 또는 Gmail, Outlook SMTP
+    host: "smtp.zoho.com",
     port: 465,
     secure: true,
     auth: {
@@ -37,13 +37,13 @@ app.post('/send', async (req, res) => {
   }
 });
 
-// GET /inbox — Receive email
+// 이메일 받기
 app.get('/inbox', async (req, res) => {
   const config = {
     imap: {
       user: process.env.EMAIL_USER,
       password: process.env.EMAIL_PASS,
-      host: 'imap.zoho.com', // 또는 imap.gmail.com
+      host: 'imap.zoho.com',
       port: 993,
       tls: true,
       authTimeout: 3000
@@ -53,14 +53,13 @@ app.get('/inbox', async (req, res) => {
   try {
     const connection = await Imap.connect(config);
     await connection.openBox('INBOX');
-
     const searchCriteria = ['UNSEEN'];
     const fetchOptions = { bodies: [''], markSeen: false };
 
     const messages = await connection.search(searchCriteria, fetchOptions);
     const parsed = await Promise.all(messages.map(async (item) => {
       const all = item.parts.find(part => part.which === '');
-      const parsed = await MailParser(all.body);
+      const parsed = await simpleParser(all.body);
       return {
         subject: parsed.subject,
         from: parsed.from.text,
@@ -71,7 +70,7 @@ app.get('/inbox', async (req, res) => {
     res.json(parsed);
   } catch (err) {
     console.error(err);
-    res.status(500).send('IMAP error');
+    res.status(500).send('Failed to fetch emails');
   }
 });
 
